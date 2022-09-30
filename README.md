@@ -42,4 +42,4 @@ Your app is ready to be deployed!
 
 ## License
 
-The Literate is open-sourced software licensed under the [MIT license](https://github.com/cybertiwari/ecommerce/blob/master/LICENSE.md).
+This software licensed under the [MIT license](https://github.com/cybertiwari/ecommerce/blob/master/LICENSE.md).
