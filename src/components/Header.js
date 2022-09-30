@@ -1,84 +1,66 @@
-import React from 'react'
+import { Link } from "react-router-dom";
+import CategoryItem from "./CategoryItem";
+import useMakeRequest from "../hooks/useMakeRequest";
+import { BasketContext } from "../context/BasketContext";
+import { useContext } from "react";
 
-export default function Header() {
-  return (
-    <header id="aa-header">
-    <div className="aa-header-top">
-      <div className="container">
-        <div className="row">
-          <div className="col-md-12">
-            <div className="aa-header-top-area">
-              <div className="aa-header-top-left">
-                <div className="aa-language">
-                  <div className="dropdown">
-                    <a className="btn dropdown-toggle" href="#" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                      <img src="img/flag/english.jpg" alt="english flag"/>ENGLISH
-                      <span className="caret"></span>
-                    </a>
-                    <ul className="dropdown-menu" aria-labelledby="dropdownMenu1">
-                      <li><a href="#"><img src="img/flag/french.jpg" alt=""/>FRENCH</a></li>
-                      <li><a href="#"><img src="img/flag/english.jpg" alt=""/>ENGLISH</a></li>
-                    </ul>
-                  </div>
-                </div>
+const Header = (props) => {
+	const result = useMakeRequest("https://fakestoreapi.com/products/categories");
+	const { basketItems, setBasketIsOpen, basketTotal: _basketTotal } = useContext(BasketContext);
+	return (
+		<header className="section-header">
+			<section className="header-main border-bottom bg-white">
+				<div className="container-fluid">
+					<div className="row p-2 pt-3 pb-3 d-flex align-items-center">
+						<div className="col-md-2">
+						<Link to="/">
+							<img className="d-none d-md-flex" src="/logo192.png" width="50" />
+        				</Link>
+						</div>
+						<div className="col-md-8">
+							<div className="d-flex form-inputs">
+								<input className="form-control" type="text" placeholder="Search any product..." />
+								{/* <i className="bx bx-search"></i> */}
+							</div>
+						</div>
+						<div className="col-md-2"  
+							onClick={(e) => {
+								e.preventDefault();
+								setBasketIsOpen((oldState) => !oldState);
+							}}
+						>
+							<div className="d-flex d-none d-md-flex flex-row align-items-center">
+								<span className="shop-bag"><i className='bx bxs-shopping-bag'></i></span>
+								<div className="d-flex flex-column ms-2">
+									<span className="qty">{basketItems.length} Product</span>
+									<span className="fw-bold">{_basketTotal.toFixed(2)}</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
 
-                <div className="aa-currency">
-                  <div className="dropdown">
-                    <a className="btn dropdown-toggle" href="#" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                      <i className="fa fa-usd"></i>USD
-                      <span className="caret"></span>
-                    </a>
-                    <ul className="dropdown-menu" aria-labelledby="dropdownMenu1">
-                      <li><a href="#"><i className="fa fa-euro"></i>EURO</a></li>
-                      <li><a href="#"><i className="fa fa-jpy"></i>YEN</a></li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-              <div className="aa-header-top-right">
-                <ul className="aa-head-top-nav-right">
-                  <li><a href="account.html">My Account</a></li>
-                  <li className="hidden-xs"><a href="cart.html">My Cart</a></li>
-                  <li><a href="" data-toggle="modal" data-target="#login-modal">Login</a></li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+			<nav className="navbar navbar-expand-lg navbar-light bg-light">
+				<div className="container-fluid">
+					<a className="navbar-brand d-md-none d-md-flex" href="#">Categories</a>
+					<button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+						<span className="navbar-toggler-icon"></span>
+					</button>
+					<div className="collapse navbar-collapse" id="navbarNavDropdown">
+						<ul className="navbar-nav">
+							<li className="nav-item">
+      							<Link to="/"  onClick={() => props.setFilter(props.products)} className="nav-link">All</Link>
+    						</li>
+							{result.data 
+							? result.data.map((cat, index) => <CategoryItem data={cat} key={index} filterProduct={props.filterProduct} />) 
+							: <div>{result.error}</div>}
+						</ul>
+					</div>
+				</div>
+			</nav>
+		</header>
+	)
+};
 
-    <div className="aa-header-bottom">
-      <div className="container">
-        <div className="row">
-          <div className="col-md-12">
-            <div className="aa-header-bottom-area">
-              <div className="aa-logo">
-                <a href="/">
-                  <span className="fa fa-shopping-cart"></span>
-                  <p>Sun<strong>Store</strong> <span>Your Shopping Partner</span></p>
-                </a>
-              </div>
-              
-              <div className="aa-cartbox">
-                <a className="aa-cart-link" href="cart.html">
-                  <span className="fa fa-shopping-basket"></span>
-                  <span className="aa-cart-title">SHOPPING CART</span>
-                  <span className="aa-cart-notify">2</span>
-                </a>
-                
-              </div>
-              <div className="aa-search-box">
-                <form action="">
-                  <input type="text" name="" id="" placeholder="Search here ex. 'man' "/>
-                  <button type="submit"><span className="fa fa-search"></span></button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </header>
-  )
-}
+export default Header;

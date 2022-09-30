@@ -1,61 +1,77 @@
-import Index from "./components/Index/Index";
-import React, {useState,useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
+import styles from "./styles/App.module.scss";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import clsx from "clsx";
+import Home from "./pages/Home";
+import Detail from "./pages/Detail";
+import Category from "./pages/Category";
 import Header from "./components/Header";
-import Menu from "./components/Menu";
+import BasketSidebar from "./components/BasketSidebar";
 import Footer from "./components/Footer";
-import NoRoute from "./components/NoRoute";
-import {
-  BrowserRouter as Router,
-  Routes as Switch,
-  Route,
-  Link
-} from "react-router-dom";
-import Products from "./components/Products/Products";
-function App() {
-    const [categories,setCategories] = useState([]);
-    const [error, setError] = useState(null);
-    const [isLoaded, setIsLoaded] = useState(false);
-    useEffect(() => {
-        fetch("https://fakestoreapi.com/products/categories")
-        .then(res => res.json())
-        .then(
-            (result) => {
-            setIsLoaded(true);
-            setCategories(result);
-            },
-            (error) => {
-            setIsLoaded(true);
-            setError(error);
-            }
-        )
-    }, [])
-    if (error) {
-        return <div>Error: {error.message}</div>;
-    } else if (!isLoaded) {
-        return (
-            <div id="wpf-loader-two">          
-                <div className="wpf-loader-two-inner">
-                    <span>Loading</span>
-                </div>
-            </div> 
-        )
-    } else {
-      return (
-        <>
-          
-          <Router>
-            <Header />
-            <Menu categories={categories}/>
-            <Switch>
-              <Route path="/" element={<Index/>} />
-              <Route path="/category" element={<Products/>} />
-              <Route path='*' element={<NoRoute/>} />
-            </Switch>
-          </Router>
-          <Footer/>
-        </>
-      );
-    }
-}
+import MobileBottomNav from "./components/MobileBottomNav";
+import useMobileDetect from "./hooks/useMobileDetect";
+import BasketContextProvider from "./context/BasketContext";
+
+const App = () => {
+	const device = useMobileDetect();
+	const [error, setError] = useState(null);
+	const [isLoaded, setIsLoaded] = useState(false);
+	const [data, setData] = useState([]);
+	const [filter, setFilterProduct] = useState([]);
+	const filterProduct = (category) => {
+		const updateList = data.filter((x) => x.category === category);
+		setFilterProduct(updateList);
+	}
+	useEffect(() => {
+		fetch("https://fakestoreapi.com/products")
+			.then(res => res.json())
+			.then(
+				(result) => {
+					setData(result);
+					setFilterProduct(result);
+					setIsLoaded(true);
+				},
+				(error) => {
+					setIsLoaded(true);
+					setError(error);
+				}
+			)
+	}, []);
+	if (!isLoaded) {
+		return (
+			<div className="d-flex flex-column min-vh-100 justify-content-center align-items-center">
+				<div className="spinner-border text-success" style={{ width: '5rem', height: '5rem' }} role="status">
+					<span className="sr-only">Loading...</span>
+				</div>
+			</div>
+		);
+	} else {
+		return (
+			<Router>
+				<BasketContextProvider>
+					<div className={clsx(device.type === "mobile" && styles.paddingForMobile, styles.container)}>
+						<Header setFilter={setFilterProduct} filterProduct={filterProduct} products={data} />
+						<main className={styles.main}>
+							<Switch>
+								<Route path="/" exact>
+									<Home products={filter} />
+								</Route>
+								<Route path="/product/:slug">
+									<Detail />
+								</Route>
+								<Route path="/category">
+									<Category products={filter} />
+								</Route>
+							</Switch>
+						</main>
+						<Footer />
+					</div>
+					<BasketSidebar />
+					{device.type === "mobile" && <MobileBottomNav />}
+				</BasketContextProvider>
+			</Router>
+		);
+	}
+};
 
 export default App;
